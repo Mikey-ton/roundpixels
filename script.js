@@ -15,7 +15,7 @@ let timer = 60;
 let currentCircle = null;
 let circleStartTime = null;
 let gameStartTime = null;
-let gameIntervalId = null; //More descriptive name
+let gameIntervalId = null;
 let scores = [];
 let playerName = null;
 let isGameRunning = false;
@@ -30,7 +30,7 @@ canvas.addEventListener('touchstart', handleGameClick);
 // Game Functions
 function startGame() {
   playerName = prompt("Введите ваше имя пользователя Telegram:");
-  if (!playerName) return; //Handle case where user cancels
+  if (!playerName) return;
 
   mainMenu.style.display = 'none';
   gameScreen.style.display = 'block';
@@ -42,7 +42,7 @@ function startGame() {
   gameStartTime = Date.now();
   isGameRunning = true;
   updateScore();
-  gameIntervalId = setInterval(gameLoop, 30); // Increased interval for better performance
+  gameIntervalId = setInterval(gameLoop, 30);
 }
 
 
@@ -64,7 +64,7 @@ function gameLoop() {
   }
 
   drawCircles();
-  updateTimer(); //moved here for better timing
+  updateTimer();
 }
 
 
@@ -73,17 +73,17 @@ function createCircle() {
   const maxSize = 50;
   let size, x, y;
 
-  //Efficient circle generation using do while loop:
   do {
-    size = Math.floor(Math.random() * (maxSize - minSize)) + minSize;
-    size = Math.min(size, canvas.width / 2 - 50, canvas.height / 2 - 50); // Increased safety margin
+    size = Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize;
+    const maxAllowedSize = Math.min(canvas.width, canvas.height) / 2 - 50;
+    size = Math.min(size, maxAllowedSize);
     x = Math.random() * (canvas.width - 2 * size) + size;
     y = Math.random() * (canvas.height - 2 * size) + size;
-  } while (x + size > canvas.width || x - size < 0 || y + size > canvas.height || y - size < 0);
+    currentCircle = { x, y, size, clicked: false };
+  } while (x - size < 0 || x + size > canvas.width || y - size < 0 || y + size > canvas.height);
 
-  currentCircle = { x, y, size, clicked: false };
   circleStartTime = Date.now();
-  console.log("Circle created: x =", currentCircle.x, "y =", currentCircle.y, "size =", currentCircle.size); //debugging log
+  console.log("Circle created: x =", currentCircle.x, "y =", currentCircle.y, "size =", currentCircle.size);
 }
 
 function drawCircles() {
