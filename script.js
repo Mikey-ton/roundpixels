@@ -1,4 +1,4 @@
-// DOM elements 1
+// DOM elements
 const mainMenu = document.getElementById('mainMenu');
 const gameScreen = document.getElementById('gameScreen');
 const resultsScreen = document.getElementById('resultsScreen');
@@ -17,7 +17,6 @@ let circleStartTime = null;
 let gameStartTime = null;
 let gameIntervalId = null;
 let scores = [];
-let playerName = null;
 let isGameRunning = false;
 
 // Event Listeners
@@ -29,9 +28,6 @@ canvas.addEventListener('touchstart', handleGameClick);
 
 // Game Functions
 function startGame() {
-  playerName = prompt("Введите ваше имя пользователя Telegram:");
-  if (!playerName) return;
-
   mainMenu.style.display = 'none';
   gameScreen.style.display = 'block';
   canvas.width = window.innerWidth;
@@ -129,12 +125,12 @@ function gameOver() {
 }
 
 function storeScore(newScore) {
-  scores.push({ name: playerName, score: newScore });
+  scores.push({ score: newScore });
   scores.sort((a, b) => b.score - a.score);
 }
 
 function showResults() {
-  resultsScreen.innerHTML = `<h1>Таблица лидеров</h1><ol>${scores.map(entry => `<li>${entry.name}: ${entry.score}</li>`).join('')}</ol><button id="backToMenuButton">В меню</button>`;
+  resultsScreen.innerHTML = `<h1>Таблица лидеров</h1><ol>${scores.map(entry => `<li>${entry.score}</li>`).join('')}</ol><button id="backToMenuButton">В меню</button>`;
   resultsScreen.style.display = 'block';
   mainMenu.style.display = 'none';
   gameScreen.style.display = 'none';
