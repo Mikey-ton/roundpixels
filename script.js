@@ -30,8 +30,11 @@ canvas.addEventListener('touchstart', handleGameClick);
 function startGame() {
     mainMenu.style.display = 'none';
     gameScreen.style.display = 'block';
+
+    // Resize canvas to match the screen size
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+
     score = 0;
     timer = 60;
     currentCircle = null;
@@ -55,27 +58,22 @@ function gameLoop() {
     updateTimer();
     if (!currentCircle || currentCircle.clicked) {
         createCircle();
-    } else if (circleStartTime && Date.now() - circleStartTime >= 3000) {
-        currentCircle.clicked = true;
-        createCircle();
     }
 
     drawCircles();
 }
 
-// Improved createCircle function
 function createCircle() {
     const minSize = 20;
     const maxSize = 50;
     let size, x, y;
 
-    // Improved circle generation with guaranteed on-screen placement:
     do {
         size = Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize;
         const maxAllowedSize = Math.min(canvas.width, canvas.height) / 2 - 50; // Safety margin
         size = Math.min(size, maxAllowedSize);
-        x = Math.random() * (canvas.width - 2 * size) + size; // Ensure at least 'size' pixels from left edge
-        y = Math.random() * (canvas.height - 2 * size) + size; // Ensure at least 'size' pixels from top edge
+        x = Math.random() * (canvas.width - 2 * size) + size;
+        y = Math.random() * (canvas.height - 2 * size) + size;
         currentCircle = { x, y, size, clicked: false };
     } while (x - size < 0 || x + size > canvas.width || y - size < 0 || y + size > canvas.height);
 
@@ -102,7 +100,7 @@ function handleGameClick(event) {
 
     if (dx * dx + dy * dy < currentCircle.size * currentCircle.size) {
         score++;
-        currentCircle.clicked = true; // Set to true after a click
+        currentCircle.clicked = true; //Important: set clicked to true
         updateScore();
     }
 }
