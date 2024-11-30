@@ -5,7 +5,7 @@ const timerDisplay = document.getElementById('timer');
 
 let score = 0;
 let timer = 60;
-let circle = null; // Changed variable
+let circle = null; // Changed variable 1
 let gameStarted = false;
 let timeIntervalId = null;
 
