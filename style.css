@@ -65,7 +65,7 @@ body {
 
 
 /* Media query for smaller screens (adjust breakpoint as needed) */
-@media (max-width: 768px) {
+#media (max-width: 768px) {
   #score, #timer {
     font-size: 2rem;
   }
