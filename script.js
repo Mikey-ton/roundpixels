@@ -1,4 +1,4 @@
-// DOM elements
+// DOM elements 1
 const mainMenu = document.getElementById('mainMenu');
 const gameScreen = document.getElementById('gameScreen');
 const resultsScreen = document.getElementById('resultsScreen');
