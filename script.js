@@ -26,7 +26,6 @@ canvas.addEventListener('click', handleGameClick);
 canvas.addEventListener('touchstart', handleGameClick);
 
 
-// Game Functions
 function startGame() {
   mainMenu.style.display = 'none';
   gameScreen.style.display = 'block';
@@ -38,29 +37,33 @@ function startGame() {
   gameStartTime = Date.now();
   isGameRunning = true;
   updateScore();
-  gameIntervalId = setInterval(gameLoop, 30);
+  updateTimer(); //Initialize timer
+
+  gameIntervalId = setInterval(gameLoop, 30); // Start game loop
+  scores = []; //Clear scores for new game
 }
 
 
 function gameLoop() {
   if (!isGameRunning) return;
 
-  const elapsedGameTime = Date.now() - gameStartTime;
-  if (elapsedGameTime >= 60000) {
+  const elapsedTime = Date.now() - gameStartTime;
+  if (elapsedTime >= 60000) {
     clearInterval(gameIntervalId);
     gameOver();
     return;
   }
 
-  if (!currentCircle || currentCircle.clicked) {
+
+  updateTimer(); //Update timer within the loop
+  if (!currentCircle) {
     createCircle();
-  } else if (circleStartTime && Date.now() - circleStartTime >= 3000) {
-    currentCircle.clicked = true;
+  } else if (Date.now() - circleStartTime >= 3000) {
+    currentCircle = null; //Clear the circle if the timeout has passed
     createCircle();
   }
 
   drawCircles();
-  updateTimer();
 }
 
 
@@ -79,12 +82,12 @@ function createCircle() {
   } while (x - size < 0 || x + size > canvas.width || y - size < 0 || y + size > canvas.height);
 
   circleStartTime = Date.now();
-  console.log("Circle created: x =", currentCircle.x, "y =", currentCircle.y, "size =", currentCircle.size);
 }
+
 
 function drawCircles() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  if (currentCircle && !currentCircle.clicked) {
+  if (currentCircle) {
     ctx.beginPath();
     ctx.arc(currentCircle.x, currentCircle.y, currentCircle.size, 0, Math.PI * 2);
     ctx.fillStyle = 'white';
@@ -92,34 +95,34 @@ function drawCircles() {
   }
 }
 
+
 function handleGameClick(event) {
-  if (!currentCircle || currentCircle.clicked || !isGameRunning) return;
+  if (!isGameRunning || !currentCircle) return;
 
   const rect = canvas.getBoundingClientRect();
-  const x = event.type === 'touchstart' ? event.touches[0].clientX - rect.left : event.offsetX;
-  const y = event.type === 'touchstart' ? event.touches[0].clientY - rect.top : event.offsetY;
-
-  const dx = x - currentCircle.x;
-  const dy = y - currentCircle.y;
+  const clickX = event.offsetX;
+  const clickY = event.offsetY;
+  const dx = clickX - currentCircle.x;
+  const dy = clickY - currentCircle.y;
 
   if (dx * dx + dy * dy < currentCircle.size * currentCircle.size) {
     score++;
-    currentCircle.clicked = true;
+    currentCircle = null;
     updateScore();
   }
 }
 
 function updateScore() {
-  scoreDisplay.textContent = `Счёт: ${score}`;
+  scoreDisplay.textContent = `Score: ${score}`;
 }
 
 function updateTimer() {
-  timerDisplay.textContent = Math.max(0, 60 - Math.floor((Date.now() - gameStartTime) / 1000));
+  const currentTime = Math.max(0, 60 - Math.floor((Date.now() - gameStartTime) / 1000));
+  timerDisplay.textContent = `Time: ${currentTime}`;
 }
 
 function gameOver() {
   isGameRunning = false;
-  gameScreen.style.display = 'none';
   storeScore(score);
   showResults();
 }
@@ -130,7 +133,7 @@ function storeScore(newScore) {
 }
 
 function showResults() {
-  resultsScreen.innerHTML = `<h1>Таблица лидеров</h1><ol>${scores.map(entry => `<li>${entry.score}</li>`).join('')}</ol><button id="backToMenuButton">В меню</button>`;
+  resultsScreen.innerHTML = `<h1>Leaderboard</h1><ol>${scores.map(entry => `<li>${entry.score}</li>`).join('')}</ol><button id="backToMenuButton">Back to Menu</button>`;
   resultsScreen.style.display = 'block';
   mainMenu.style.display = 'none';
   gameScreen.style.display = 'none';
@@ -139,5 +142,8 @@ function showResults() {
   backButton.addEventListener('click', () => {
     resultsScreen.style.display = 'none';
     mainMenu.style.display = 'block';
+    gameScreen.style.display = 'none'; //Added
   });
 }
+
+//Initial setup, no need for this now.
