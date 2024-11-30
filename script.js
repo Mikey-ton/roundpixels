@@ -64,8 +64,8 @@ function gameLoop() {
 }
 
 function createCircle() {
-    const minSize = 20; // Removed scaleFactor from minSize and maxSize
-    const maxSize = 40; // Removed scaleFactor from minSize and maxSize
+    const minSize = 5; // Removed scaleFactor from minSize and maxSize
+    const maxSize = 20; // Removed scaleFactor from minSize and maxSize
     let size = Math.floor(Math.random() * (maxSize - minSize)) + minSize;
     size = Math.min(size, canvas.width / 2, canvas.height / 2);
     const x = Math.random() * (canvas.width - 2 * size) + size;
