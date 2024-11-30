@@ -20,7 +20,7 @@ let isGameRunning = false;
 let scaleFactor = 1; // Removed the fixed-resolution scaling factor calculation
 
 playButton.addEventListener('click', () => {
-    playerName = prompt("Введите ваше имя пользователя Telegram:");
+    playerName = prompt("Name");
     if (playerName) {
         mainMenu.style.display = 'none';
         gameScreen.style.display = 'block';
@@ -56,7 +56,7 @@ function gameLoop() {
 
     if (!currentCircle || currentCircle.clicked) {
         createCircle();
-    } else if (circleStartTime && Date.now() - circleStartTime >= 3000) {
+    } else if (circleStartTime && Date.now() - circleStartTime >= 1500) {
         currentCircle.clicked = true;
         createCircle();
     }
@@ -64,8 +64,8 @@ function gameLoop() {
 }
 
 function createCircle() {
-    const minSize = 50; // Removed scaleFactor from minSize and maxSize
-    const maxSize = 100; // Removed scaleFactor from minSize and maxSize
+    const minSize = 20; // Removed scaleFactor from minSize and maxSize
+    const maxSize = 40; // Removed scaleFactor from minSize and maxSize
     let size = Math.floor(Math.random() * (maxSize - minSize)) + minSize;
     size = Math.min(size, canvas.width / 2, canvas.height / 2);
     const x = Math.random() * (canvas.width - 2 * size) + size;
