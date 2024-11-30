@@ -17,10 +17,9 @@ let intervalId = null;
 let scores = [];
 let playerName = null;
 let isGameRunning = false;
-let scaleFactor = 1; // Removed the fixed-resolution scaling factor calculation
 
 playButton.addEventListener('click', () => {
-    playerName = prompt("Name");
+    playerName = prompt("Введите ваше имя пользователя Telegram:");
     if (playerName) {
         mainMenu.style.display = 'none';
         gameScreen.style.display = 'block';
@@ -33,7 +32,6 @@ ratingButton.addEventListener('click', showResults);
 function startGame() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    scaleFactor = 1; // Removed fixed-resolution scaling
     score = 0;
     timer = 60;
     currentCircle = null;
@@ -56,7 +54,7 @@ function gameLoop() {
 
     if (!currentCircle || currentCircle.clicked) {
         createCircle();
-    } else if (circleStartTime && Date.now() - circleStartTime >= 1500) {
+    } else if (circleStartTime && Date.now() - circleStartTime >= 3000) {
         currentCircle.clicked = true;
         createCircle();
     }
@@ -64,8 +62,8 @@ function gameLoop() {
 }
 
 function createCircle() {
-    const minSize = 5; // Removed scaleFactor from minSize and maxSize
-    const maxSize = 20; // Removed scaleFactor from minSize and maxSize
+    const minSize = 20;
+    const maxSize = 50;
     let size = Math.floor(Math.random() * (maxSize - minSize)) + minSize;
     size = Math.min(size, canvas.width / 2, canvas.height / 2);
     const x = Math.random() * (canvas.width - 2 * size) + size;
@@ -78,7 +76,7 @@ function drawCircles() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (currentCircle && !currentCircle.clicked) {
         ctx.beginPath();
-        ctx.arc(currentCircle.x, currentCircle.y, currentCircle.size, 0, Math.PI * 2);
+        ctx.arc(currentCircle.x + currentCircle.size, currentCircle.y + currentCircle.size, currentCircle.size, 0, Math.PI * 2);
         ctx.fillStyle = 'white';
         ctx.fill();
     }
@@ -95,8 +93,8 @@ function handleGameClick(event) {
             y = event.touches[0].clientY - rect.top;
         }
 
-        const dx = x - currentCircle.x;
-        const dy = y - currentCircle.y;
+        const dx = x - (currentCircle.x + currentCircle.size);
+        const dy = y - (currentCircle.y + currentCircle.size);
         if (dx * dx + dy * dy < currentCircle.size * currentCircle.size) {
             score++;
             currentCircle.clicked = true;
