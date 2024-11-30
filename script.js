@@ -1,3 +1,4 @@
+// DOM elements
 const mainMenu = document.getElementById('mainMenu');
 const gameScreen = document.getElementById('gameScreen');
 const resultsScreen = document.getElementById('resultsScreen');
@@ -8,133 +9,139 @@ const timerDisplay = document.getElementById('timer');
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// Game variables
 let score = 0;
 let timer = 60;
 let currentCircle = null;
 let circleStartTime = null;
 let gameStartTime = null;
-let intervalId = null;
+let gameIntervalId = null; //More descriptive name
 let scores = [];
 let playerName = null;
 let isGameRunning = false;
 
-playButton.addEventListener('click', () => {
-    playerName = prompt("Введите ваше имя пользователя Telegram:");
-    if (playerName) {
-        mainMenu.style.display = 'none';
-        gameScreen.style.display = 'block';
-        startGame();
-    }
-});
-
+// Event Listeners
+playButton.addEventListener('click', startGame);
 ratingButton.addEventListener('click', showResults);
+canvas.addEventListener('click', handleGameClick);
+canvas.addEventListener('touchstart', handleGameClick);
 
+
+// Game Functions
 function startGame() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    score = 0;
-    timer = 60;
-    currentCircle = null;
-    gameStartTime = Date.now();
-    isGameRunning = true;
-    updateScore();
-    canvas.addEventListener('touchstart', handleGameClick, false);
-    canvas.addEventListener('click', handleGameClick);
-    intervalId = setInterval(gameLoop, 10);
+  playerName = prompt("Введите ваше имя пользователя Telegram:");
+  if (!playerName) return; //Handle case where user cancels
+
+  mainMenu.style.display = 'none';
+  gameScreen.style.display = 'block';
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  score = 0;
+  timer = 60;
+  currentCircle = null;
+  gameStartTime = Date.now();
+  isGameRunning = true;
+  updateScore();
+  gameIntervalId = setInterval(gameLoop, 30); // Increased interval for better performance
 }
+
 
 function gameLoop() {
-    if (!isGameRunning) return;
+  if (!isGameRunning) return;
 
-    if (Date.now() - gameStartTime >= 60000) {
-        clearInterval(intervalId);
-        gameOver();
-        return;
-    }
+  const elapsedGameTime = Date.now() - gameStartTime;
+  if (elapsedGameTime >= 60000) {
+    clearInterval(gameIntervalId);
+    gameOver();
+    return;
+  }
 
-    if (!currentCircle || currentCircle.clicked) {
-        createCircle();
-    } else if (circleStartTime && Date.now() - circleStartTime >= 3000) {
-        currentCircle.clicked = true;
-        createCircle();
-    }
-    drawCircles();
+  if (!currentCircle || currentCircle.clicked) {
+    createCircle();
+  } else if (circleStartTime && Date.now() - circleStartTime >= 3000) {
+    currentCircle.clicked = true;
+    createCircle();
+  }
+
+  drawCircles();
+  updateTimer(); //moved here for better timing
 }
 
+
 function createCircle() {
-    const minSize = 20;
-    const maxSize = 50;
-    let size = Math.floor(Math.random() * (maxSize - minSize)) + minSize;
-    size = Math.min(size, canvas.width / 2 - 50, canvas.height / 2 - 50); // Увеличенный отступ до 50px
-    const x = Math.random() * (canvas.width - 2 * size) + size;
-    const y = Math.random() * (canvas.height - 2 * size) + size;
-    currentCircle = { x, y, size, clicked: false };
-    circleStartTime = Date.now();
+  const minSize = 20;
+  const maxSize = 50;
+  let size, x, y;
+
+  //Efficient circle generation using do while loop:
+  do {
+    size = Math.floor(Math.random() * (maxSize - minSize)) + minSize;
+    size = Math.min(size, canvas.width / 2 - 50, canvas.height / 2 - 50); // Increased safety margin
+    x = Math.random() * (canvas.width - 2 * size) + size;
+    y = Math.random() * (canvas.height - 2 * size) + size;
+  } while (x + size > canvas.width || x - size < 0 || y + size > canvas.height || y - size < 0);
+
+  currentCircle = { x, y, size, clicked: false };
+  circleStartTime = Date.now();
+  console.log("Circle created: x =", currentCircle.x, "y =", currentCircle.y, "size =", currentCircle.size); //debugging log
 }
 
 function drawCircles() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (currentCircle && !currentCircle.clicked) {
-        ctx.beginPath();
-        ctx.arc(currentCircle.x + currentCircle.size, currentCircle.y + currentCircle.size, currentCircle.size, 0, Math.PI * 2);
-        ctx.fillStyle = 'white';
-        ctx.fill();
-    }
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (currentCircle && !currentCircle.clicked) {
+    ctx.beginPath();
+    ctx.arc(currentCircle.x, currentCircle.y, currentCircle.size, 0, Math.PI * 2);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+  }
 }
 
 function handleGameClick(event) {
-    if (currentCircle && !currentCircle.clicked && isGameRunning) {
-        let x = event.offsetX;
-        let y = event.offsetY;
+  if (!currentCircle || currentCircle.clicked || !isGameRunning) return;
 
-        if (event.type === 'touchstart') {
-            const rect = canvas.getBoundingClientRect();
-            x = event.touches[0].clientX - rect.left;
-            y = event.touches[0].clientY - rect.top;
-        }
+  const rect = canvas.getBoundingClientRect();
+  const x = event.type === 'touchstart' ? event.touches[0].clientX - rect.left : event.offsetX;
+  const y = event.type === 'touchstart' ? event.touches[0].clientY - rect.top : event.offsetY;
 
-        const dx = x - (currentCircle.x + currentCircle.size);
-        const dy = y - (currentCircle.y + currentCircle.size);
-        if (dx * dx + dy * dy < currentCircle.size * currentCircle.size) {
-            score++;
-            currentCircle.clicked = true;
-            updateScore();
-            currentCircle = null;
-        }
-    }
+  const dx = x - currentCircle.x;
+  const dy = y - currentCircle.y;
+
+  if (dx * dx + dy * dy < currentCircle.size * currentCircle.size) {
+    score++;
+    currentCircle.clicked = true;
+    updateScore();
+  }
 }
 
 function updateScore() {
-    scoreDisplay.textContent = `Счёт: ${score}`;
+  scoreDisplay.textContent = `Счёт: ${score}`;
 }
 
 function updateTimer() {
-    timerDisplay.textContent = Math.max(0, 60 - Math.floor((Date.now() - gameStartTime) / 1000));
+  timerDisplay.textContent = Math.max(0, 60 - Math.floor((Date.now() - gameStartTime) / 1000));
 }
 
 function gameOver() {
-    isGameRunning = false;
-    gameScreen.style.display = 'none';
-    storeScore(score);
-    showResults();
+  isGameRunning = false;
+  gameScreen.style.display = 'none';
+  storeScore(score);
+  showResults();
 }
 
 function storeScore(newScore) {
-    scores.push({ name: playerName, score: newScore });
-    scores.sort((a, b) => b.score - a.score);
+  scores.push({ name: playerName, score: newScore });
+  scores.sort((a, b) => b.score - a.score);
 }
 
 function showResults() {
-    resultsScreen.innerHTML = `<h1>Таблица лидеров</h1><ol>${scores.map(entry => `<li>${entry.name}: ${entry.score}</li>`).join('')}</ol><button id="backToMenuButton">В меню</button>`;
-    resultsScreen.style.display = 'block';
-    mainMenu.style.display = 'none';
-    gameScreen.style.display = 'none';
+  resultsScreen.innerHTML = `<h1>Таблица лидеров</h1><ol>${scores.map(entry => `<li>${entry.name}: ${entry.score}</li>`).join('')}</ol><button id="backToMenuButton">В меню</button>`;
+  resultsScreen.style.display = 'block';
+  mainMenu.style.display = 'none';
+  gameScreen.style.display = 'none';
 
-    const backButton = document.getElementById('backToMenuButton');
-    backButton.addEventListener('click', () => {
-        resultsScreen.style.display = 'none';
-        mainMenu.style.display = 'block';
-    });
+  const backButton = document.getElementById('backToMenuButton');
+  backButton.addEventListener('click', () => {
+    resultsScreen.style.display = 'none';
+    mainMenu.style.display = 'block';
+  });
 }
-
-setInterval(updateTimer, 100);
