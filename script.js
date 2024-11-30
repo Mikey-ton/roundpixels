@@ -16,9 +16,8 @@ let intervalId;
 let scores = [];
 let playerName = null;
 
-
 playButton.addEventListener('click', () => {
-    playerName = prompt("Enter your Telegram username:"); 
+    playerName = prompt("Enter your Telegram username:");
     if (playerName) {
         mainMenu.style.display = 'none';
         gameScreen.style.display = 'block';
@@ -36,6 +35,8 @@ function startGame() {
     currentCircle = null;
     gameStartTime = Date.now();
     updateScore();
+    canvas.addEventListener('touchstart', handleGameClick, false);
+    canvas.addEventListener('click', handleGameClick);
     intervalId = setInterval(gameLoop, 10);
 }
 
@@ -73,10 +74,15 @@ function drawCircles() {
     }
 }
 
-canvas.addEventListener('click', (event) => {
+function handleGameClick(event) {
     const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    let x = event.clientX - rect.left;
+    let y = event.clientY - rect.top;
+
+    if (event.type === 'touchstart') {
+        x = event.touches[0].clientX - rect.left;
+        y = event.touches[0].clientY - rect.top;
+    }
 
     if (currentCircle && !currentCircle.clicked &&
         Math.sqrt((x - currentCircle.x)**2 + (y - currentCircle.y)**2) < currentCircle.size) {
@@ -85,7 +91,8 @@ canvas.addEventListener('click', (event) => {
         updateScore();
         currentCircle = null;
     }
-});
+}
+
 
 function updateScore() {
     scoreDisplay.textContent = `Score: ${score}`;
@@ -102,8 +109,8 @@ function gameOver() {
 }
 
 function storeScore(newScore) {
-    scores.push({ name: playerName, score: newScore }); 
-    scores.sort((a, b) => b.score - a.score); 
+    scores.push({ name: playerName, score: newScore });
+    scores.sort((a, b) => b.score - a.score);
 }
 
 function showResults() {
