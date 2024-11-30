@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Round Pixels</title>
+<title>Click the Circles!</title>
 <style>
 body { margin: 0; overflow: hidden; }
 canvas { background-color: #f0f0f0; display: block; }
+#score { position: absolute; top: 10px; left: 10px; font-size: 20px; color: #333; }
+#timer { position: absolute; top: 10px; right: 10px; font-size: 20px; color: #333; }
 </style>
 </head>
 <body>
 <canvas id="myCanvas"></canvas>
+<div id="score">Счёт: 0</div>
+<div id="timer">Время: 60</div>
 <script src="script.js"></script>
 </body>
 </html>
