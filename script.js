@@ -6,23 +6,18 @@ const timerDisplay = document.getElementById('timer');
 let score = 0;
 let timer = 60;
 let circle = null;
-let gameStarted = false;
-let timeIntervalId = null;
+let gameIntervalId = null;
 
 function createCircle() {
-    const radius = 25;
-    let x, y;
-
-    do {
-        x = Math.random() * (canvas.width - 2 * radius) + radius;
-        y = Math.random() * (canvas.height - 2 * radius) + radius;
-        circle = { x, y, radius, clicked: false };
-    } while (
-        x < 0 ||
-        x > canvas.width ||
-        y < 0 ||
-        y > canvas.height
-    );
+  const radius = 25;
+  const max_x = canvas.width - 2 * radius;
+  const max_y = canvas.height - 2 * radius;
+  circle = {
+    x: Math.random() * max_x + radius,
+    y: Math.random() * max_y + radius,
+    radius: radius,
+    clicked: false,
+  };
 }
 
 function drawCircle() {
@@ -30,22 +25,21 @@ function drawCircle() {
   if (circle) {
     ctx.beginPath();
     ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
-    ctx.fillStyle = circle.clicked ? 'gray' : 'blue';
+    ctx.fillStyle = circle.clicked ? 'lightgray' : 'blue';
     ctx.fill();
   }
 }
 
 function handleCanvasClick(event) {
-  if (!gameStarted) return;
-
   const rect = canvas.getBoundingClientRect();
   const clickX = event.clientX - rect.left;
   const clickY = event.clientY - rect.top;
 
-  if (circle) {
-    const dx = clickX - circle.x;
-    const dy = clickY - circle.y;
-    if (dx * dx + dy * dy < circle.radius * circle.radius) {
+  if (circle && !circle.clicked) {
+    const distance = Math.sqrt(
+      Math.pow(clickX - circle.x, 2) + Math.pow(clickY - circle.y, 2)
+    );
+    if (distance < circle.radius) {
       circle.clicked = true;
       score++;
       updateScore();
@@ -56,38 +50,30 @@ function handleCanvasClick(event) {
 }
 
 function updateScore() {
-  scoreDisplay.textContent = `Счёт: ${score}`;
+  scoreDisplay.textContent = `Score: ${score}`;
 }
 
 function updateTimer() {
   timer--;
-  timerDisplay.textContent = `Время: ${timer}`;
+  timerDisplay.textContent = `Time: ${timer}`;
   if (timer <= 0) {
     gameOver();
   }
 }
 
 function gameOver() {
-  clearInterval(timeIntervalId);
-  gameStarted = false;
-  alert(`Игра окончена! Ваш счёт: ${score}`);
+  clearInterval(gameIntervalId);
+  alert(`Game Over! Your score: ${score}`);
 }
 
-function startGameLoop() {
-  gameStarted = true;
-  score = 0;
-  updateScore();
-  timer = 60;
-  updateTimer();
-  createCircle(); // Create the initial circle 1
-  drawCircle(); // Draw the initial circle
-  timeIntervalId = setInterval(updateTimer, 1000);
+function startGame() {
+  createCircle();
+  drawCircle();
+  gameIntervalId = setInterval(updateTimer, 1000);
 }
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-
 canvas.addEventListener('click', handleCanvasClick);
-document.getElementById('playButton').addEventListener('click', startGameLoop);
 
-drawCircle(); // Initial draw
+startGame(); // Start the game automatically
