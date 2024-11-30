@@ -65,7 +65,7 @@ function createCircle() {
     const minSize = 20;
     const maxSize = 50;
     let size = Math.floor(Math.random() * (maxSize - minSize)) + minSize;
-    size = Math.min(size, canvas.width / 2, canvas.height / 2);
+    size = Math.min(size, canvas.width / 2 - 50, canvas.height / 2 - 50); // Увеличенный отступ до 50px
     const x = Math.random() * (canvas.width - 2 * size) + size;
     const y = Math.random() * (canvas.height - 2 * size) + size;
     currentCircle = { x, y, size, clicked: false };
